@@ -1,0 +1,323 @@
+@font-face {
+    font-family: 'lora-regular';
+    src: url('../font/lora/Lora-Regular.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'lora-medium';
+    src: url('../font/lora/Lora-Medium.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'lora-bold';
+    src: url('../font/lora/Lora-Bold.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'urbanist-regular';
+    src: url('../font/urbanist/Urbanist-Regular.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'urbanist-medium';
+    src: url('../font/urbanist/Urbanist-Medium.ttf') format('truetype');
+}
+
+:root {
+    /* --primary-color: 104, 49, 69;
+    --secondary-color: 106, 51, 71;
+    --gold-color: 236, 217, 171;
+    --pink-color: 232, 170, 192;
+    --light-color: 255, 255, 255; */
+
+    --lora-regular: 'lora-regular', Arial, Helvetica, sans-serif;
+    --lora-medium: 'lora-medium', Arial, Helvetica, sans-serif;
+    --lora-bold: 'lora-bold', Arial, Helvetica, sans-serif;
+    --urbanist-regular: 'urbanist-regular', Arial, Helvetica, sans-serif;
+    --urbanist-medium: 'urbanist-medium', Arial, Helvetica, sans-serif;
+}
+
+* {
+    font-family: var(--urbanist-medium);
+    color: rgba(var(--light-color), 1);
+    transition: 250ms;
+}
+
+html::-webkit-scrollbar {
+    display: none;
+}
+
+html {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+body {
+    background-color: #B89FF3;
+    overflow-x: hidden;
+}
+
+body.body-gap {
+    background-image: linear-gradient(to bottom, #A48AFD 48%, #F3F3F3 20%);
+    overflow-x: hidden;
+}
+
+.custom-hr {
+    background-color: #E5E5E5;
+    /* Ensure the rule is visible after page load */
+    display: block;
+    height: 1px; /* You can adjust the height if you want a thicker line */
+    border: 0; /* Remove default border to prevent double lines */
+}
+
+/* COMPONENT STYLE */
+section.section-gap {
+    padding: 122px 0;
+    background-color: white;
+}
+
+section.section-gapp {
+    padding: 60px 0;
+    background-color: white;
+}
+
+.row.row-gap {
+    margin-bottom: 56px
+}
+
+
+/* END COMPONENT STYLE */
+
+
+/* COMPONENT NAVBAR */
+.navbar {
+    border-bottom: 1px solid rgba(var(--gold-color), 0.24);
+    background-color: white;
+    border-radius: 8px; /* Added border-radius */
+}
+
+.nav-link {
+    font-size: 1rem;
+    color: black;
+}
+
+.wrapper-width {
+    width: 43%;
+}
+
+.nav-link.active,
+.nav-link:hover {
+    color: #5D37E1 !important;
+}
+
+.nav-link img {
+    height: 15px;
+    width: auto;
+    margin-right: 5px;
+}
+/* END COMPONENT NAVBAR */
+
+
+
+/* SECTION HERO */
+.hero {
+    height: 88vh;
+}
+
+.hero .wrapper-paragraph {
+    padding-bottom: 38px;
+    margin-bottom: 32pc;
+    border-bottom: 1px solid rgba(var(--gold-color), 0.24);
+}
+
+.hero .caption {
+    font-size: 0.875rem;
+    color: rgba(var(--light-color), 0.72);
+}
+/* END SECTION HERO */
+
+/* SECTION BELI VOUCHER */
+.heroes {
+    height: 25vh;
+}
+
+/* END SECTION BELI VOUCHER */
+
+/* SECTION KERANJANG */
+.heroess {
+    height: 20vh;
+}
+
+.heroesss {
+    height: 58vh;
+}
+
+
+/* END SECTION BELI VOUCHER */
+
+
+/* FOOTER */
+.footer {
+    padding-top: 122px;
+}
+
+.footer .paragraph-small {
+    font-size: 0.913rem;
+    color: rgba(var(--light-color), 0.72);
+    text-decoration: none;
+}
+
+.footer a.paragraph-small:hover {
+    color: rgba(var(--light-color), 1);
+}
+
+.copyright {
+    padding: 22px 0 !important;
+    border-top: 1px solid rgba(var(--gold-color), 0.12);
+}
+
+.copyright p {
+    font-size: 0.875rem;
+    color: rgba(var(--light-color), 0.56);
+}
+/* END FOOTER */
+
+
+/* BREAKPOINT XL */
+@media (max-width: 1399.98px) {
+    .headline {
+        font-size: 3.25rem;
+    }
+
+    .title {
+        font-size: 2.25rem;
+    }
+
+    h2 {
+        font-size: 2.5rem;
+    }
+}
+/* END BREAKPOINT XL */
+
+
+/* BREAKPOINT LG */
+@media (max-width: 1199.98px) {
+    .headline {
+        font-size: 2.5rem;
+    }
+
+    .title {
+        font-size: 2rem;
+    }
+
+    h2 {
+        font-size: 2rem;
+    }
+
+    .wrapper-width {
+        width: 40%;
+    }
+
+    /* .about,
+    .adventage,
+    .testimoni {
+        height: fit-content;
+    } */
+}
+/* END BREAKPOINT LG */
+
+
+/* BREAKPOINT MD */
+@media (max-width: 991.98px) {
+    .about,
+    .adventage,
+    .testimoni {
+        height: fit-content;
+        padding: 72px 0 !important;
+    }
+
+    .hero {
+        height: fit-content;
+        padding-bottom: 72px !important;
+    }
+
+    section.section-gap {
+        padding: 72px 0;
+    }
+
+    .row.row-gap {
+        margin-bottom: 42px
+    }
+
+    .headline {
+        font-size: 3.25rem;
+    }
+
+    .title {
+        font-size: 2.5rem;
+    }
+
+    h2 {
+        font-size: 2.5rem;
+    }
+}
+/* END BREAKPOINT MD */
+
+
+/* BREAKPOINT SM */
+@media (max-width: 767.98px) {
+    .headline {
+        font-size: 3rem;
+    }
+
+    .title {
+        font-size: 2.25rem;
+    }
+
+    h2 {
+        font-size: 2.25rem;
+    }
+}
+/* END BREAKPOINT MD */
+
+/* Style the modal */
+    .modal-cart {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 1; /* Sit on top */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgb(0,0,0); /* Fallback color */
+        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    }
+
+    /* Modal Content/Box */
+    .modal-content {
+        /* Adjust the height and width as needed */
+        top: 30%;
+        height: 250px;
+        width: 450px;
+        margin: auto;
+        border-radius: 15px;
+        overflow: hidden; /* To maintain the border-radius */
+    }
+
+    /* Close Button */
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .close:hover,
+    .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+
