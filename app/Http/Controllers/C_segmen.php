@@ -34,46 +34,53 @@ class C_segmen extends Controller
 
         // Menghitung Recency, Frequency, Monetary, dan Engagement untuk setiap pelanggan
         $rfmData = [];
+        $recencyWeight = 4;
+        $frequencyWeight = 3;
+        $monetaryWeight = 1;
+
         foreach ($transactions as $transaction) {
             $customerId = $transaction->id_pelanggan;
             $recency = now()->diffInDays($transaction->waktu_transaksi);
             $quantity = $transaction->qty;
-            $totalBayar = $transaction->total_bayar;         
+            $totalBayar = $transaction->total_bayar;
 
             // Menambah data ke dalam array rfmData
             if (!isset($rfmData[$customerId])) {
                 $rfmData[$customerId] = [
-                    'recency' => $recency,
-                    'frequency' => $quantity,
-                    'monetary' => $totalBayar,
+                    'recency' => $recency * $recencyWeight,
+                    'frequency' => $quantity * $frequencyWeight,
+                    'monetary' => $totalBayar * $monetaryWeight,
                     'engagement' => 0, // Inisialisasi engagement
                 ];
             } else {
-                $rfmData[$customerId]['recency'] = min($rfmData[$customerId]['recency'], $recency);
-                $rfmData[$customerId]['frequency'] += $quantity;
-                $rfmData[$customerId]['monetary'] += $totalBayar;
+                $rfmData[$customerId]['recency'] = min($rfmData[$customerId]['recency'], $recency * $recencyWeight);
+                $rfmData[$customerId]['frequency'] += $quantity * $frequencyWeight;
+                $rfmData[$customerId]['monetary'] += $totalBayar * $monetaryWeight;
             }
         }
 
+        $engagementWeight = 2;
         // Menggabungkan data engagement
         foreach ($engagements as $engagement) {
             $customerId = $engagement->id_pelanggan;
             $jumlahTransaksi = M_riwayat::where('id_pelanggan', $customerId)->count();
 
             if (isset($rfmData[$customerId])) {
-                $rfmData[$customerId]['engagement'] = $engagement->engagement += $jumlahTransaksi;
+                $rfmData[$customerId]['engagement'] += ($engagement->engagement + $jumlahTransaksi) * $engagementWeight;
             } else {
                 $rfmData[$customerId] = [
                     'recency' => 0,
                     'frequency' => 0,
                     'monetary' => 0,
-                    'engagement' => $engagement->engagement + $jumlahTransaksi,
+                    'engagement' => ($engagement->engagement + $jumlahTransaksi) * $engagementWeight,
                 ];
             }
-        }   
+        }
+        // Menentukan nilai min dan max untuk setiap metrik
+        $minMaxValues = $this->calculateMinMax($rfmData);
 
         // Hitung skor total dan simpan skor total ke array baru
-        $totalScores = [];
+        // $totalScores = [];
         foreach ($rfmData as $customerId => $rfm) {
             $recencyScore = $this->calculateScore($rfm['recency'], $rfmData, 'recency');
             $frequencyScore = $this->calculateScore($rfm['frequency'], $rfmData, 'frequency');
@@ -81,7 +88,7 @@ class C_segmen extends Controller
             $engagementScore = $this->calculateScore($rfm['engagement'], $rfmData, 'engagement');
 
             $total_score = $recencyScore['score'] + $frequencyScore['score'] + $monetaryScore['score'] + $engagementScore['score'];
-
+            $rfmData[$customerId]['total_score'] = $total_score;
             $totalScores[$customerId] = [
                 'total_score' => $total_score,
                 'recency' => $recencyScore['score'],
@@ -96,19 +103,16 @@ class C_segmen extends Controller
             return $b['total_score'] <=> $a['total_score'];
         });
 
-        // Bagi pelanggan menjadi 5 segmen (20% teratas ke Very High, dst.)
+        // Bagi pelanggan menjadi 5 segmen berdasarkan skor
         $totalCustomers = count($totalScores);
         $segmentSize = ceil($totalCustomers / 5);
-        $segments = ['Very High', 'High', 'Medium', 'Low', 'Very Low']; // Segmen asli
+        $segments = ['Very High', 'High', 'Medium', 'Low', 'Very Low'];
 
         $currentSegmentIndex = 0;
         $currentSegmentCount = 0;
         foreach ($totalScores as $customerId => $scores) {
             if ($currentSegmentCount >= $segmentSize && $currentSegmentIndex < 4) {
                 $currentSegmentIndex++;
-                $currentSegmentCount = 0;
-            } elseif ($currentSegmentIndex == 4 && $currentSegmentCount >= $segmentSize) {
-                $currentSegmentIndex = 0; // Mulai dari Very Low lagi setelah Very High
                 $currentSegmentCount = 0;
             }
 
@@ -182,48 +186,40 @@ class C_segmen extends Controller
     private function calculateScore($value, $rfmData, $type)
     {
         // Mengurutkan data berdasarkan nilai $type (recency, frequency, monetary, engagement)
-        $sortedData = collect($rfmData)->sortByDesc($type)->values()->all();
+        $sortedData = collect($rfmData)->sortBy($type)->values()->all();
         // Menghitung jumlah pelanggan
         $totalCustomers = count($sortedData);
 
-        // Membagi pelanggan ke dalam 5 segmen dengan distribusi yang sesuai
-        $segments = [];
+        // Mendapatkan nilai minimum dan maksimum untuk tipe yang diberikan
+        $minValue = $sortedData[0][$type];
+        $maxValue = $sortedData[$totalCustomers - 1][$type];
+        $range = $maxValue - $minValue;
+        $interval = $range / 5;
+
+        // Membuat rentang nilai dan skor yang sesuai
+        $ranges = [];
         for ($i = 0; $i < 5; $i++) {
-            $segments[$i] = [];
+            $start = $minValue + ($i * $interval);
+            $end = $i == 4 ? $maxValue : $start + $interval;
+            $ranges[] = [
+                'start' => $start,
+                'end' => $end,
+                'score' => $i + 1
+            ];
         }
 
-        $segmentSize = floor($totalCustomers / 5);
-        $remainder = $totalCustomers % 5;
-
-        $currentIndex = 0;
-        for ($i = 0; $i < 5; $i++) {
-            $extra = $i < $remainder ? 1 : 0;
-            $size = $segmentSize + $extra;
-            $segments[$i] = array_slice($sortedData, $currentIndex, $size);
-            $currentIndex += $size;
-        }
-
-        // Menghitung skor berdasarkan indeks dengan menghindari nilai yang sama
-        foreach ($segments as $index => $segment) {
-            foreach ($segment as $subIndex => $item) {
-                if ($item[$type] === $value) {
-                    if ($type == 'recency') {
-                        // Recency: nilai yang lebih kecil mendapatkan skor lebih tinggi
-                        return [
-                            'score' => 5 - $index - ($subIndex / count($segment)),
-                            'segment' => $index + 1
-                        ];
-                    } else {
-                        // Frequency, monetary, engagement: nilai yang lebih besar mendapatkan skor lebih tinggi
-                        return [
-                            'score' => $index + 1 + ($subIndex / count($segment)),
-                            'segment' => $index + 1
-                        ];
-                    }
-                }
+        // Menentukan skor berdasarkan nilai
+        foreach ($ranges as $range) {
+            if ($value >= $range['start'] && $value <= $range['end']) {
+                return [
+                    'score' => $range['score'],
+                    'segment' => $range['score']
+                ];
             }
         }
 
-        return null; // Nilai tidak ditemukan dalam data
+        return null; // Nilai tidak ditemukan dalam rentang data
     }
+
+
 }

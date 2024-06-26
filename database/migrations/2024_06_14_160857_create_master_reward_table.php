@@ -16,7 +16,6 @@ return new class extends Migration
         Schema::create('master_reward', function (Blueprint $table) {
             $table->id();
             $table->string('segmen');
-            $table->integer('min_score');
             $table->integer('reward');
             $table->timestamps();
         });
